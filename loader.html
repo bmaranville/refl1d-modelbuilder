@@ -1,0 +1,133 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>python-socketio test</title>
+    <script type="text/javascript" src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.min.js"></script>
+    <style>
+        li.json_item {
+            /* font-family: 'Courier New', Courier, monospace; */
+            font-family: monospace;
+            list-style: none;
+            /* font-weight: bold; */
+        }
+
+        li.json_item ul {
+            padding-left: 1em;
+        }
+
+        .json_item .folder {
+            cursor: pointer;
+        }
+
+        .json_item label {
+            /* font-style: italic; */
+            color: purple;
+        }
+
+        .json_item span {
+            padding-left: 0.4em;
+        }
+
+        .json_item .label {
+            color: purple;
+        }
+
+        .json_item .null {
+            color: gray;
+        }
+
+        .json_item .number {
+            color: blue;
+        }
+
+        .json_item .string {
+            color: red;
+        }
+
+        .json_item .string::before,
+        .json_item .string::after {
+            content: "\"";
+        }
+    </style>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function () {
+            var socket = io.connect();
+
+            socket.on('connect', function () {
+                socket.emit('my_event', { data: 'I\'m connected!' });
+                socket.emit('join', { room: 'data_load' });
+            });
+            socket.on('disconnect', function () {
+                $('#log').append('<br>Disconnected');
+            });
+            socket.on('my_response', function (msg) {
+                $('#log').append('<br>Received: ' + msg.data);
+            });
+            socket.on('data_loaded', function (msg) {
+                console.log('data loaded:', msg);
+                window.msg = msg;
+                let loaded_data = eval("(" + msg.data + ")");
+                window.json_viewer.$props.item = loaded_data;
+            });
+            // event handler for server sent data
+            // the data is displayed in the "Received" section of the page
+            // handlers for the different forms in the page
+            // these send data to the server in a variety of ways
+            $('form#load4').submit(function (event) {
+                socket.emit('load4', { data: { filename: $('#load4_data').val() } });
+                return false;
+            });
+            document.getElementById("file_choose").onchange = function() {
+                console.log(this.value);
+                let file = this.files[0];
+                let filename = this.value.replace("C:\\fakepath\\", "");
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    socket.emit("load_data", {
+                        data: event.target.result,
+                        kwargs: {filename}
+                    });
+                }
+                reader.readAsText(file);
+                this.value = "";
+            }
+            
+        });
+    </script>
+    <script type="module">
+        import { default as Vue } from 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js';
+        import { jsonItem } from './static/json_viewer.vue.js';        
+        window.onload = function() {
+          let ViewerClass = Vue.extend(jsonItem);
+          var app = new ViewerClass({
+            data: () => ({
+                isOpen: true
+            }),
+            propsData: {
+              item: {},
+              name: 'loaded data'
+            }
+          }).$mount("#loaded_data");
+
+          window.json_viewer = app;
+          
+        }
+      
+      </script>
+</head>
+
+<body>
+    <h1>Remote load4 result</h1>
+    <div id="loader">
+        <label>Choose .refl file to load:<input id="file_choose" type="file" accept=".refl"></label>
+    </div>
+    <h2>Receive:</h2>
+    <div>
+        <p id="log"></p>
+    </div>
+    <div id="loaded_data"></div>
+</body>
+
+</html>
