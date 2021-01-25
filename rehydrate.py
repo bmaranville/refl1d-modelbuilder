@@ -55,8 +55,9 @@ TYPES = {
  
 from bumps.bounds import Bounds, init_bounds
 
-from refl1d.names import Slab, Parameter, SLD, Stack, Experiment, NeutronProbe, Magnetism, Experiment, PolarizedNeutronProbe, Vacuum
+from refl1d.names import Slab, Parameter, SLD, Stack, Experiment, NeutronProbe, Magnetism, Experiment, PolarizedNeutronProbe, Vacuum, MultiFitProblem, FreeVariables
 from refl1d import names
+# from bumps.fitproblem import MultiFitProblem
 import numpy as np
 
 class Deserializer(object):
@@ -132,4 +133,16 @@ class Deserializer(object):
 
     def Vacuum(self, s):
         return Vacuum(**s)
+
+    def FreeVariables(self, s):
+        kw = s.pop("parameters", {})
+        # TODO: reverse engineer the init for ParameterSet
+        return FreeVariables(**s)
+    
+    def MultiFitProblem(self, s):
+        base_models = s.pop('models', [])
+        models = [m['fitness'] for m in base_models]
+        s['models'] = models
+        s.pop('partial', None)
+        return MultiFitProblem(**s)
             
