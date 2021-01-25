@@ -35,6 +35,10 @@ async def load4(sid, message):
     await sio.emit('data_loaded', {'data': do_load4(**kwargs)}, room="data_load")
 
 @sio.event
+async def example_problem(sid, message):
+    await sio.emit('data_loaded', {'data': open('./static/example_YIG_problem.json', 'rt').read()})
+
+@sio.event
 async def my_event(sid, message):
     await sio.emit('my_response', {'data': message['data']}, room=sid)
 

@@ -93,6 +93,9 @@
                 reader.readAsText(file);
                 this.value = "";
             }
+            document.getElementById("show_example").onclick = function() {
+                socket.emit("example_problem", {})
+            }
             
         });
     </script>
@@ -121,7 +124,10 @@
 <body>
     <h1>Remote load4 result</h1>
     <div id="loader">
-        <label>Choose .refl file to load:<input id="file_choose" type="file" accept=".refl"></label>
+        <label>Choose .refl file to load:<input id="file_choose" type="file" accept=".refl"/></label>
+    </div>
+    <div>
+        <input type="button" id="show_example" value="Show Example Problem (YIG multifit)"/>
     </div>
     <h2>Receive:</h2>
     <div>

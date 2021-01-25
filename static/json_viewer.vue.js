@@ -16,7 +16,7 @@ let template = `
       @click="$emit('item-picked', item)"
       >{{String(item)}}</span>
   </div>
-  <ul v-show="isOpen" v-if="itemType == 'object'">
+  <ul v-show="isOpen" v-if="isOpen && itemType == 'object'">
     <json-item
       v-for="(entry, index) in Object.entries(item)"
       :key="entry[0]"
@@ -25,7 +25,7 @@ let template = `
       @item-picked="$emit('item-picked', $event)"
     ></json-item>
   </ul>
-  <ul v-show="isOpen" v-if="itemType == 'array'">
+  <ul v-show="isOpen" v-if="isOpen && itemType == 'array'">
     <json-item
       v-for="(subitem, index) in item"
       :key="index"
