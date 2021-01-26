@@ -50,12 +50,14 @@ TYPES = {
  'Slab',
  'Stack',
  'Unbounded',
- 'Vacuum'
+ 'Vacuum',
+ 'MultiFitProblem',
+ 'FreeVariables'
 }
  
 from bumps.bounds import Bounds, init_bounds
 
-from refl1d.names import Slab, Parameter, SLD, Stack, Experiment, NeutronProbe, Magnetism, Experiment, PolarizedNeutronProbe, Vacuum, MultiFitProblem, FreeVariables
+from refl1d.names import Slab, Parameter, SLD, Stack, Experiment, NeutronProbe, Magnetism, PolarizedNeutronProbe, Vacuum, MultiFitProblem, FreeVariables
 from refl1d import names
 # from bumps.fitproblem import MultiFitProblem
 import numpy as np
@@ -71,8 +73,7 @@ class Deserializer(object):
             for key,value in obj.items():
                 obj[key] = self.rehydrate(value)
             t = obj.pop('type', None)
-            if t is not None and hasattr(self, t):
-                #hydrated = getattr(self, t)(obj)
+            if t in TYPES:
                 hydrated = self.instantiate(t, obj)
                 return hydrated
             else:
@@ -88,8 +89,11 @@ class Deserializer(object):
         s = serialized.copy()
         id = s.pop("id", None)
         hydrated = getattr(self, typename)(s)
-        if id is not None and not id in self.refs:
-            self.refs[id] = hydrated
+        if id is not None:
+            if not id in self.refs:
+                self.refs[id] = hydrated
+            else:
+                hydrated = self.refs[id]
         return hydrated
 
     def Parameter(self, s):
